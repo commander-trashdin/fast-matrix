@@ -14,8 +14,8 @@ in two ways:
 D = (AB)C , D = A(BC)
 ```
 
-Using the first way gives  `50*5*100 + 50*100*10 = 75000`$ scalar multiplications.
-Using the second way gives$`5*100*10 + 50*5*10 = 7500`$, which is ten times less. Our goal is to minimize the number of multiplications.
+Using the first way gives  `50*5*100 + 50*100*10 = 75000` scalar multiplications.
+Using the second way gives `5*100*10 + 50*5*10 = 7500`, which is ten times less. Our goal is to minimize the number of multiplications.
 
 Function `%build-tree` takes a vector of dimensions, `#((4 . 5) (5 . 10) (10 . 2) (2 . 8) (8 . 6) (6 . 5) (5 . 10) ...)` (every element corresponds to `(height . width)` of a matrix) and returns list of `(the best tree for the whole range from 0 to n, the resulting matrix size, the total number of scalar multiplications)`
 
