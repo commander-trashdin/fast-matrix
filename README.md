@@ -1,29 +1,37 @@
-# fast-matrix
+# Fast-matrix (tensor?)
 
-Consider we have 3 matrices A B and C of sizes `(50 5)` `(5 100)` and `(100 10)` respectively.
-There are 2 ways to multiply them then:
-(AB)C or A(BC)
+This small library optimizes the associative order of matrix multiplication (in the future -- tensor contraction) using a dynamic programming algorithm.
 
-First way gives `50*5*100 + 50*100*10 = 75000` multiplications.
-Second way gives `5*100*10 + 50*5*10 = 7500`. As you seem the difference is huge.
+# Abstract
 
-Let's optimize it!
+Consider 3 matrices $`A_{50 \times 5}, B_{5 \times 100}, C_{100 \times 10}`$. 
+We can obtain matrix
+```
+D = A * B * C;
+```
+in two ways:
+```math
+D = (AB)C  \;\;\; D = A(BC)
+```
 
-We take a vector of dimensions, `#((4 . 5) (5 . 10) (10 . 2) (2 . 8) (8 . 6) (6 . 5) (5 . 10) ...)` (height width)
-and what we want is the best tree for the whole range from 0 to n.
+Using the first way gives  $`50 \cdot 5 \cdot 100 + 50 \cdot 100 \cdot 10 = 75000`$ scalar multiplications.
+Using the second way gives$`5 \cdot 100 \cdot 10 + 50 \cdot 5 \cdot 10 = 7500`$, which is ten times less. Our goal is to minimize the number of multiplications.
 
-We solve it for each subrange (from i to j).
+Function `%build-tree` takes a vector of dimensions, `#((4 . 5) (5 . 10) (10 . 2) (2 . 8) (8 . 6) (6 . 5) (5 . 10) ...)` (every element corresponds to `(height . width)` of a matrix) and returns list of `(the best tree for the whole range from 0 to n, the resulting matrix size, the total number of scalar multiplications)`
+
+# Algorithm
+
+Dynamic programming - we solve it for each subrange (from i to j).
 
 Ranges of length 1 and 2 are trivial.
-
 For range from i to (+ i k) now -- there are k-1 options, of which we chose the best one.
 Options are:
 
-1: multiply i matrix by the best of range (+ i 1) to (+ i k)
+* multiply i matrix by the best of range (+ i 1) to (+ i k)
 
-2: multiply the best of range i, (+ i 1) to the best of range (+ i 2) (+ i k)
+* multiply the best of range i, (+ i 1) to the best of range (+ i 2) (+ i k)
 
-3: multiply the best of range i, (+ i 2) to the best of range (+ i 3) (+ i k)
+* multiply the best of range i, (+ i 2) to the best of range (+ i 3) (+ i k)
 
 ...etc
 
