@@ -11,7 +11,7 @@ D = A * B * C;
 ```
 in two ways:
 ```math
-D = (AB)C  \;\;\; D = A(BC)
+D = (AB)C , D = A(BC)
 ```
 
 Using the first way gives  $`50 \cdot 5 \cdot 100 + 50 \cdot 100 \cdot 10 = 75000`$ scalar multiplications.
