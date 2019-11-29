@@ -19,13 +19,14 @@
     res))
 
 (defun index->matrix (operation indices matrices)
+  "Tree of indexes -> tree of multiplications"
   (if (atom indices)
       (elt matrices indices)
       (list operation (index->matrix operation (car indices) matrices)
                       (index->matrix operation (cadr indices) matrices))))
 
 (defun %build-tree (dimensions)
-  (declare (optimize (debug 3) (safety 3)))
+  "Builds an order tree of multiplications, dynamically solving it for all ranges."
   (let* ((n (length dimensions))
          (table (make-array (list n n))))
     (loop :for i :from 0 :below n
@@ -55,6 +56,8 @@
 
 
 (defmacro fast-multiply (mult-function extract-dimensions &rest matrices)
-  (let* ((dimension-vector (make-array (length matrices) :initial-contents (mapcar extract-dimensions matrices)))
-         (optimal-path (car (%build-tree dimension-vector))))
-    `(index->matrix ,mult-function ,optimal-path ,matrices)))
+  (let ((dimension-vector (make-array (length matrices) :initial-contents (mapcar extract-dimensions matrices))))
+    (destructuring-bind (tree size multiplications) (%build-tree dimension-vector)
+      (format t "The resulting matrix dimensions: ~s~%Required atomic multiplications: ~s~%"
+              size multiplications)
+      (index->matrix mult-function tree matrices))))
