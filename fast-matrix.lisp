@@ -18,12 +18,20 @@
     (incf (second res) (second snd))
     res))
 
-(defun index->matrix (operation indices matrices)
+(defun %index->matrix (operation indices matrices)
   "Tree of indexes -> tree of multiplications"
   (if (atom indices)
       (elt matrices indices)
-      (list operation (index->matrix operation (car indices) matrices)
-                      (index->matrix operation (cadr indices) matrices))))
+      (list operation (%index->matrix operation (car indices) matrices)
+                      (%index->matrix operation (cadr indices) matrices))))
+
+
+(defun %straight-forward-check (sizes)
+  "Naive atomic multiplications check for comparison"
+  (loop :for i :from 1 :below (length sizes)
+        :with fh := (car (aref sizes 0))
+        :sum (* fh (car (aref sizes i)) (cdr (aref sizes i)))))
+
 
 (defun %build-tree (dimensions)
   "Builds an order tree of multiplications, dynamically solving it for all ranges."
@@ -56,8 +64,11 @@
 
 
 (defmacro fast-multiply (mult-function extract-dimensions &rest matrices)
-  (let ((dimension-vector (make-array (length matrices) :initial-contents (mapcar extract-dimensions matrices))))
+  (let* ((dimensions (map 'vector extract-dimensions matrices))
+         (dimension-vector (make-array (length matrices) :initial-contents dimensions))
+         (naive-time (%straight-forward-check dimensions)))
     (destructuring-bind (tree size multiplications) (%build-tree dimension-vector)
-      (format t "The resulting matrix dimensions: ~s~%Required atomic multiplications: ~s~%"
-              size multiplications)
-      (index->matrix mult-function tree matrices))))
+      (format t "The resulting matrix dimensions: ~s~%Required atomic multiplications: ~s~%Compared to: ~s multiplications in naive implementation~%Acceleration ratio is ~s~%"
+              size multiplications naive-time (float (/ naive-time multiplications)))
+      (%index->matrix mult-function tree matrices))))
+
