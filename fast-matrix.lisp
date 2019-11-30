@@ -3,13 +3,12 @@
 (in-package #:fast-matrix)
 
 
-
 (defun %check-two-matrices (fst snd)
-  "fst and snd are cons of a form (height . width) in this case.
+  "fst and snd are cons of a form (height width) in this case.
    The function returns the dimensions of resulting thing and the number of
    multiplications requred. I work under assertion, that those matrices are
    actually multipliable => (= (cdr fst) (car snd))."
-  (list (cons (car fst) (cdr snd)) (* (car fst) (cdr fst) (cdr snd))))
+  (list (list (car fst) (cadr snd)) (* (car fst) (cadr fst) (cadr snd))))
 
 (defun %add-two-cases (fst snd)
   "Compares two cases of what previous thing returns and returns the best one."
@@ -30,11 +29,12 @@
   "Naive atomic multiplications check for comparison"
   (loop :for i :from 1 :below (length sizes)
         :with fh := (car (aref sizes 0))
-        :sum (* fh (car (aref sizes i)) (cdr (aref sizes i)))))
+        :sum (* fh (car (aref sizes i)) (cadr (aref sizes i)))))
 
 
 (defun %build-tree (dimensions)
   "Builds an order tree of multiplications, dynamically solving it for all ranges."
+  (declare (optimize (debug 3) (safety 3)))
   (let* ((n (length dimensions))
          (table (make-array (list n n))))
     (loop :for i :from 0 :below n
@@ -42,7 +42,7 @@
     (loop :for i :from 0 :below (1- n)
           :do (setf (aref table i (1+ i))
                     (cons (list i (1+ i)) (%check-two-matrices (cadr (aref table i i))
-                                                 (cadr (aref table (1+ i) (1+ i)))))))
+                                                               (cadr (aref table (1+ i) (1+ i)))))))
     (loop :for len :from 2 :below n
           :do (loop :for ind :from 0 :below (- n len)
                     :do (setf (aref table ind (+ ind len))
@@ -71,4 +71,3 @@
       (format t "The resulting matrix dimensions: ~s~%Required atomic multiplications: ~s~%Compared to: ~s multiplications in naive implementation~%Acceleration ratio is ~s~%"
               size multiplications naive-time (float (/ naive-time multiplications)))
       (%index->matrix mult-function tree matrices))))
-
