@@ -63,8 +63,8 @@
     (aref table 0 (1- n))))
 
 
-(defmacro fast-multiply (mult-function extract-dimensions &rest matrices)
-  (let* ((dimensions (map 'vector extract-dimensions matrices))
+(defmacro fast-multiply (mult-function &optional extract-dimensions dimensions-vector &rest matrices)
+  (let* ((dimensions (or dimensions-vector (map 'vector extract-dimensions matrices)))
          (dimension-vector (make-array (length matrices) :initial-contents dimensions))
          (naive-time (%straight-forward-check dimensions)))
     (destructuring-bind (tree size multiplications) (%build-tree dimension-vector)
