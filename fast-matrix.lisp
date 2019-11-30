@@ -8,14 +8,19 @@
    The function returns the dimensions of resulting thing and the number of
    multiplications requred. I work under assertion, that those matrices are
    actually multipliable => (= (cdr fst) (car snd))."
-  (list (list (car fst) (cadr snd)) (* (car fst) (cadr fst) (cadr snd))))
+  (destructuring-bind (first-height first-width) fst
+    (destructuring-bind (sec-height sec-width) snd
+      (list (list first-height sec-width) (* first-width sec-height sec-width)))))
 
 (defun %add-two-cases (fst snd)
   "Compares two cases of what previous thing returns and returns the best one."
-  (let ((res (%check-two-matrices (car fst) (car snd))))
-    (incf (second res) (second fst))
-    (incf (second res) (second snd))
-    res))
+  (destructuring-bind (first-matrix first-mult) fst
+    (destructuring-bind (sec-matrix sec-mult) snd
+      (let ((res (%check-two-matrices first-matrix sec-matrix)))
+        (incf (second res) first-mult)
+        (incf (second res) sec-mult)
+        res))))
+
 
 (defun %index->matrix (operation indices matrices)
   "Tree of indexes -> tree of multiplications"
