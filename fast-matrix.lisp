@@ -3,21 +3,21 @@
 (in-package #:fast-matrix)
 
 
-(defun %check-two-matrices (fst snd)
+(defun %check-two-matrices (first second)
   #.(format
      nil "~@{~A~%~}"
-     "fst and snd are cons of a form (height width) in this case."
+     "first and second are cons of a form (height width) in this case."
      "The function returns the dimensions of resulting thing and the number of"
      "multiplications requred. I work under assertion, that those matrices are"
-     "actually multipliable => (= (cdr fst) (car snd)).")
-  (destructuring-bind (first-height first-width) fst
-    (destructuring-bind (sec-height sec-width) snd
+     "actually multipliable => (= (cdr first) (car second)).")
+  (destructuring-bind (first-height first-width) first
+    (destructuring-bind (sec-height sec-width) second
       (list (list first-height sec-width) (* first-width sec-height sec-width)))))
 
-(defun %add-two-cases (fst snd)
+(defun %add-two-cases (first second)
   "Compares two cases of what previous thing returns and returns the best one."
-  (destructuring-bind (first-matrix first-mult) fst
-    (destructuring-bind (sec-matrix sec-mult) snd
+  (destructuring-bind (first-matrix first-mult) first
+    (destructuring-bind (sec-matrix sec-mult) second
       (let ((res (%check-two-matrices first-matrix sec-matrix)))
         (incf (second res) first-mult)
         (incf (second res) sec-mult)
