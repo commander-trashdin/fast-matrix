@@ -4,10 +4,12 @@
 
 
 (defun %check-two-matrices (fst snd)
-  "fst and snd are cons of a form (height width) in this case.
-   The function returns the dimensions of resulting thing and the number of
-   multiplications requred. I work under assertion, that those matrices are
-   actually multipliable => (= (cdr fst) (car snd))."
+  #.(format
+     nil "~@{~A~%~}"
+     "fst and snd are cons of a form (height width) in this case."
+     "The function returns the dimensions of resulting thing and the number of"
+     "multiplications requred. I work under assertion, that those matrices are"
+     "actually multipliable => (= (cdr fst) (car snd)).")
   (destructuring-bind (first-height first-width) fst
     (destructuring-bind (sec-height sec-width) snd
       (list (list first-height sec-width) (* first-width sec-height sec-width)))))
