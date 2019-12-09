@@ -1,4 +1,5 @@
 ;;;; package.lisp
 
 (defpackage #:fast-matrix
-  (:use #:cl))
+  (:use #:cl)
+  (:export :fast-matrix))
