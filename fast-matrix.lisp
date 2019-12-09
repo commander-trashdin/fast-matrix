@@ -75,6 +75,13 @@
          (dimension-vector (make-array (length matrices) :initial-contents dimensions))
          (naive-time (%straight-forward-check dimensions)))
     (destructuring-bind (tree size multiplications) (%build-tree dimension-vector)
-      (format t "The resulting matrix dimensions: ~s~%Required atomic multiplications: ~s~%Compared to: ~s multiplications in naive implementation~%Acceleration ratio is ~s~%"
-              size multiplications naive-time (float (/ naive-time multiplications)))
+      (format t "~@{~A ~s~%~}"
+              "The resulting matrix dimensions:"
+              size
+              "Required atomic multiplications:"
+              multiplications
+              "Compared to multiplications in naive implementation:"
+              naive-time
+              "Acceleration ratio is:"
+              (float (/ naive-time multiplications)))
       (%index->matrix mult-function tree matrices))))
