@@ -68,20 +68,29 @@
                                     :finally (return best)))))
     (aref table 0 (1- n))))
 
+(defmacro matmul-fast (&rest matrices)
+  `,(reduce (lambda (acc m)
+              (list 'numcl:matmul acc m))
+            (cdr matrices)
+            :initial-value (car matrices)))
 
-
-(defmacro fast-multiply (mult-function &optional extract-dimensions dimensions-vector &rest matrices)
-  (let* ((dimensions (or dimensions-vector (map 'vector extract-dimensions matrices)))
-         (dimension-vector (make-array (length matrices) :initial-contents dimensions))
-         (naive-time (%straight-forward-check dimensions)))
-    (destructuring-bind (tree size multiplications) (%build-tree dimension-vector)
-      (format t "~@{~A ~s~%~}"
-              "The resulting matrix dimensions:"
-              size
-              "Required atomic multiplications:"
-              multiplications
-              "Compared to multiplications in naive implementation:"
-              naive-time
-              "Acceleration ratio is:"
-              (float (/ naive-time multiplications)))
-      (%index->matrix mult-function tree matrices))))
+(define-compiler-macro matmul-fast (&whole form &rest arg-list)
+  (if (= 2 (length arg-list))
+      `(matmul-fast ,@arg-list)
+      (let* ((dimension-vector (map 'vector #'array-dimensions arg-list))
+             (tree (car (%build-tree dimension-vector))))
+        (loop :for pair-1 :across dimension-vector
+              :for pair-2 :across (subseq dimension-vector 1)
+              :do (assert (= (second pair-1)
+                             (first pair-2))
+                          nil
+                          "Illegal array dimensions for multiplication! Can't multiply ~A by ~A"
+                          pair-1 pair-2))
+        (labels ((process-tree (tree)
+                   (cond ((atom tree) (nth tree arg-list))
+                         ((consp tree)
+                          (assert (= 2 (length tree)) nil "Tree must be binary")
+                          (list 'numcl:matmul
+                                (process-tree (first tree))
+                                (process-tree (second tree)))))))
+          (process-tree tree)))))

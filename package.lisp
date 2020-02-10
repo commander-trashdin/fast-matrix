@@ -2,4 +2,4 @@
 
 (defpackage #:fast-matrix
   (:use #:cl)
-  (:export :fast-matrix))
+  (:export #:matmul-fast))
